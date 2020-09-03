@@ -1,0 +1,23 @@
+- name: Ensure Prequisitions for NFS are met
+  apt:
+    name:
+      - nfs-common
+    state: present
+
+- name: find pvc name
+  environment:
+    KUBECONFIG: "{{ inventory_dir }}/kubeconfig"
+  shell: "kubectl -n {{ hostvars[groups['scalelite'][0]]['namespace'] }} get pvc | grep recordings-pvc | awk '{print $3}'"
+  register: pvc_name
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- name: mount NFS for writing Scalelite recordings
+  mount:
+    src: "{{ scalelite_server }}:/export/{{ pvc_name.stdout }}"
+    path: "/mnt/scalelite-recordings"
+    backup: yes
+    fstype: nfs4
+    opts: "soft,intr,nodev,nosuid,noexec"
+    state: mounted
+  debugger: on_failed

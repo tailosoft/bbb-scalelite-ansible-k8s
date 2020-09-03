@@ -1,0 +1,7 @@
+bbb_hostname: "{{ inventory_hostname }}.{{ domain }}"
+bbb_api_url: "https://{{ bbb_hostname }}/bigbluebutton/api"
+bbb_secret: changeIt
+bbb_turn_secret: changeIt
+bbb_coturn_secret: changeIt
+bbb_greenlight_enable: no
+bbb_letsencrypt_email: contact@{{ domain }}

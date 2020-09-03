@@ -1,0 +1,19 @@
+urlHost: "{{ scalelite_domain }}"
+secretKeyBase: "{{ secret_key_base }}"
+loadBalancerSecret: "{{ load_balancer_secret }}"
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: "{{ scalelite_domain }}"
+      paths:
+        - /
+  tls:
+    - secretName: scalelite-tls
+      hosts:
+        - "{{ scalelite_domain }}"
+
+redis:
+  password: "{{ redis_password }}"

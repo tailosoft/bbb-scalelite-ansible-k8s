@@ -1,0 +1,5 @@
+domain: example.com
+ansible_host: "{{ inventory_hostname }}.{{ domain }}"
+ansible_user: root # as fresh ubuntu install uses root as user
+
+scalelite_server: "bbb.{{ domain }}"

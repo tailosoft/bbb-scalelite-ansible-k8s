@@ -1,0 +1,33 @@
+- name: Install scalelite using helm
+  community.kubernetes.helm:
+    chart_ref: scalelite
+    chart_version: "{{scalelite_version}}"
+    chart_repo_url: https://chartmuseum.jx.elhouti.com/
+    state: "{{ state | default('present') }}"
+    name: "scalelite"
+    values: "{{ lookup('template', '../templates/values.yml') | from_yaml }}"
+    namespace: "{{ namespace }}"
+    kubeconfig: "{{ inventory_dir }}/kubeconfig"
+    wait: true
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- name: send scalelite pod name command
+  environment:
+    KUBECONFIG: "{{ inventory_dir }}/kubeconfig"
+  shell: "kubectl get pod -l app.kubernetes.io/name=scalelite | awk 'FNR > 1 { print $1 }'"
+  register: scalelite_pod_name_output
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- set_fact:
+    scalelite_pod_name={{ scalelite_pod_name_output.stdout }}
+
+- name: init database
+  community.kubernetes.k8s_exec:
+    namespace: "{{ namespace }}"
+    pod: "{{ scalelite_pod_name }}"
+    command: /srv/scalelite/bin/rake db:setup
+  run_once: true
+  delegate_to: 127.0.0.1
+

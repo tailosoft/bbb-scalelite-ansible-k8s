@@ -1,0 +1,40 @@
+---
+- name: send scalelite pod name command
+  environment:
+    KUBECONFIG: "{{ inventory_dir }}/kubeconfig"
+  shell: "kubectl get pod -l app.kubernetes.io/name=scalelite | awk 'FNR > 1 { print $1 }'"
+  register: scalelite_pod_name_output
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- set_fact:
+    scalelite_pod_name={{ scalelite_pod_name_output.stdout }}
+
+- name: get the list of all servers
+  environment:
+    KUBECONFIG: "{{ inventory_dir }}/kubeconfig"
+  shell: "kubectl exec -it {{ scalelite_pod_name }} -- /srv/scalelite/bin/rake servers"
+  register: all_servers
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- name: Ensure all servers are registered at the loadbalancer
+  shell: "kubectl exec -it {{ scalelite_pod_name }} -- /srv/scalelite/bin/rake servers:add[{{ hostvars[item]['bbb_api_url'] | quote }},{{ hostvars[item]['bbb_secret'] | quote }}]"
+  with_items: "{{ groups['servers'] }}"
+  when: not all_servers.stdout is search(hostvars[item]['bbb_hostname'])
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- name: Enable all servers
+  shell: "kubectl exec -it {{ scalelite_pod_name }} -- /srv/scalelite/bin/rake servers:enable[$(kubectl exec -it {{ scalelite_pod_name }} -- /srv/scalelite/bin/rake servers | grep -B 1 '{{ hostvars[item]['bbb_hostname'] | quote }}' | awk 'NR==1 {print $2}')]"
+  with_items: "{{ groups['servers'] }}"
+  when: not all_servers.stdout is search(hostvars[item]['bbb_hostname'])
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- name: Ensure new servers are instantly polled
+  environment:
+    KUBECONFIG: "{{ inventory_dir }}/kubeconfig"
+  shell: "kubectl exec -it {{ scalelite_pod_name }} -- /srv/scalelite/bin/rake poll:all"
+  run_once: true
+  delegate_to: 127.0.0.1

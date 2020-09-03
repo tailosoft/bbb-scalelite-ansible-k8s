@@ -1,0 +1,11 @@
+- hosts: scalelite
+  roles:
+    - { role: scalelite/scalelite }
+    - { role: scalelite/servers-config }
+
+# scalelite is created first as it create the volume that is mounted in each bbb server
+- hosts: servers
+  roles:
+    - { role: n0emis.bigbluebutton }
+    - { role: servers/nfs }
+    - { role: servers/record-offloader }

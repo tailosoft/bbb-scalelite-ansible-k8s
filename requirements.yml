@@ -1,0 +1,6 @@
+---
+roles:
+# pull from GitHub to ensure up-to-date version
+  - name: n0emis.bigbluebutton
+    src: https://github.com/n0emis/ansible-role-bigbluebutton
+    version: master
