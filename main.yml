@@ -9,3 +9,4 @@
     - { role: n0emis.bigbluebutton }
     - { role: servers/nfs }
     - { role: servers/record-offloader }
+    - { role: servers/ufw, tags: ufw }

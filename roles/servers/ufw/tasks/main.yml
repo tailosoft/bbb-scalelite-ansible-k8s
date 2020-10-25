@@ -1,0 +1,28 @@
+- name: Install ufw
+  apt:
+    name: ufw
+
+- name: allow SSH to avoid blocking myself outside
+  ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: allow http/https (http also for let's encrypt...)
+  ufw:
+    rule: allow
+    name: Nginx Full
+
+- name: allow turnserver traffic
+  ufw:
+    rule: allow
+    name: Turnserver
+
+- name: allow UDP ports in the range 16384 - 32768 (for FreeSWITCH/HTML5 RTP streams)
+  ufw:
+    rule: allow
+    port: '16384:32768'
+    proto: udp
+
+- name: enable ufw
+  ufw:
+    state: enabled

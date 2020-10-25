@@ -1,8 +1,8 @@
 - name: Install scalelite using helm
   community.kubernetes.helm:
-    chart_ref: scalelite
-    chart_version: "{{scalelite_version}}"
-    chart_repo_url: https://chartmuseum.jx.elhouti.com/
+    chart_ref: /home/yelhouti/kubernetes/charts/charts/scalelite/
+#    chart_version: "{{scalelite_version}}"
+#    chart_repo_url: localhost:5000
     state: "{{ state | default('present') }}"
     name: "scalelite"
     values: "{{ lookup('template', '../templates/values.yml') | from_yaml }}"
